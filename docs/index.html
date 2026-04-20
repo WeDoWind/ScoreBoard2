@@ -6,13 +6,13 @@
 <title>The WindIQ WindEurope Annual Event 2026 Challenge</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
     --bg: #0b0f14;
     --surface: #131920;
     --surface2: #1c2530;
     --border: #253040;
-    /* --accent: #00c8a0; */
     --accent: #53519e;
     --accent2: #0098f0;
     --text: #e8edf2;
@@ -45,9 +45,7 @@
 
   .container { max-width: 960px; margin: 0 auto; position: relative; z-index: 1; }
 
-  header { 
-    margin-bottom: 20px;
-  }
+  header { margin-bottom: 20px; }
   .logo-line { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
   .windmill-icon { width: 36px; height: 36px; flex-shrink: 0; }
   h1 {
@@ -111,33 +109,85 @@
   tbody tr:last-child td { border-bottom: none; }
   tbody tr { transition: background 0.15s; }
   tbody tr:hover { background: var(--surface2); }
-  .top-row td { background: rgba(0,200,160,0.05); }
+  .top-row td { background: rgba(83,81,158,0.08); }
 
   .rank-cell { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); width: 50px; }
   .medal { font-size: 18px; }
-  .email-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .val-cell { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted); text-align: right; }
   .diff-cell { font-family: 'Space Mono', monospace; font-size: 13px; text-align: right; font-weight: 700; }
   .diff-0   { color: var(--accent); }
   .diff-low { color: #80d0a0; }
   .diff-mid { color: var(--gold); }
   .diff-high{ color: #ff8060; }
 
-  .score-cell { min-width: 160px; }
-  .score-inner { display: flex; align-items: center; gap: 10px; }
-  .bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 2px; }
-  .score-num {
-    font-family: 'Space Mono', monospace; font-size: 13px;
-    font-weight: 700; color: var(--text); min-width: 36px; text-align: right;
-  }
-
   .err-msg { font-family: 'Space Mono', monospace; font-size: 12px; color: #ff6060; padding: 20px; text-align: center; }
   .loading-msg { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); padding: 40px; text-align: center; letter-spacing: 2px; }
 
+  /* ── Per-question rows ── */
+  .question-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .half { width: 100%; }
+
+  /* ── Power curve image card ── */
+  .curve-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; overflow: hidden;
+    position: relative;
+  }
+  .curve-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--accent2);
+  }
+  .curve-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 12px 14px 8px;
+  }
+  .curve-img {
+    width: 100%; display: block;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 700px) {
+    .question-row { grid-template-columns: 1fr; }
+  }
+
+  /* ── Section titles & chart ── */
+  .section-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+    margin: 36px 0 14px;
+  }
+
+  .chart-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 12px 14px 14px;
+    position: relative; overflow: hidden;
+  }
+  .chart-wrap::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--accent2);
+  }
+
+  .chart-canvas-wrap { position: relative; width: 100%; height: 220px; }
+
+  /* Daily leaderboard section */
+  .daily-section { margin-top: 40px; }
+  .daily-section h2 {
+    font-size: 14px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+  }
+  .daily-section h3 {
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    color: var(--muted); margin: 20px 0 8px;
+    text-transform: uppercase;
+  }
+
   @media (max-width: 600px) {
     .stats { grid-template-columns: 1fr 1fr; }
-    th.hide-sm, td.hide-sm { display: none; }
     h1 { font-size: 26px; }
   }
 </style>
@@ -147,8 +197,8 @@
 
   <header>
     <div class="logo-line">
-      <svg width="350" height="100" xmlns="https://www.wedowind.ch/img/we-do-wind-logo.svg">       
-           <image height="100" width="350" href="https://www.wedowind.ch/img/we-do-wind-logo.svg" />    
+      <svg width="350" height="100" xmlns="https://www.wedowind.ch/img/we-do-wind-logo.svg">
+        <image height="100" width="350" href="https://www.wedowind.ch/img/we-do-wind-logo.svg" />
       </svg>
       <h1>Wind<span>IQ</span>  Challenge</h1>
     </div>
@@ -163,103 +213,199 @@
   <div id="stats"></div>
   <div id="out"><div class="loading-msg">// LOADING LEADERBOARD...</div></div>
 
+  <!-- Per-question rows: bar chart left, power curve plot right -->
+  <div class="section-title">Power curves &amp; answer distribution</div>
+
+  <div class="question-row">
+    <div class="chart-wrap half">
+      <div class="curve-label">Power curve 1 — answers</div>
+      <div class="chart-canvas-wrap"><canvas id="chart1" role="img" aria-label="Bar chart of answer selections for power curve 1">Answer frequencies for power curve 1.</canvas></div>
+    </div>
+    <div class="curve-card half">
+      <div class="curve-label">Power curve 1</div>
+      <img src="https://raw.githubusercontent.com/WeDoWind/WindIQ-Challenge/main/plots/Power_Curve_1.png" alt="Power curve 1 plot" class="curve-img" />
+    </div>
+  </div>
+
+  <div class="question-row">
+    <div class="chart-wrap half">
+      <div class="curve-label">Power curve 2 — answers</div>
+      <div class="chart-canvas-wrap"><canvas id="chart2" role="img" aria-label="Bar chart of answer selections for power curve 2">Answer frequencies for power curve 2.</canvas></div>
+    </div>
+    <div class="curve-card half">
+      <div class="curve-label">Power curve 2</div>
+      <img src="https://raw.githubusercontent.com/WeDoWind/WindIQ-Challenge/main/plots/Power_Curve_2.png" alt="Power curve 2 plot" class="curve-img" />
+    </div>
+  </div>
+
+  <div class="question-row">
+    <div class="chart-wrap half">
+      <div class="curve-label">Power curve 3 — answers</div>
+      <div class="chart-canvas-wrap"><canvas id="chart3" role="img" aria-label="Bar chart of answer selections for power curve 3">Answer frequencies for power curve 3.</canvas></div>
+    </div>
+    <div class="curve-card half">
+      <div class="curve-label">Power curve 3</div>
+      <img src="https://raw.githubusercontent.com/WeDoWind/WindIQ-Challenge/main/plots/Power_Curve_3.png" alt="Power curve 3 plot" class="curve-img" />
+    </div>
+  </div>
+
 </div>
 
 <script>
-  /* ============================================================
-     CONFIGURATION — only edit this section
-     ============================================================ */
-
   const CSV_URL = 'https://raw.githubusercontent.com/WeDoWind/ScoreBoard2/main/docs/entries_list.csv';
 
-  // Correct answers — not visible to users
   const CORRECT_V3 = 10.1;
   const CORRECT_V2 = 7.5;
   const CORRECT_V1 = 23.7;
-  // Auto-refresh interval in seconds
   const REFRESH_SECONDS = 60;
-
-  /* ============================================================ */
 
   const medals = ['🥇', '🥈', '🥉'];
 
+  // ── Answer options ──────────────────────────────────────────
+  const OPTIONS = [
+    'Static yaw misalignment',
+    'Leading edge erosion',
+    'Wake effects',
+    'Pitch angle offset',
+    'Severe Icing'
+  ];
+
+  // Colors matching the site palette
+  const OPT_COLORS = ['#53519e', '#0098f0', '#1D9E75', '#f0b840', '#e05a3a'];
+
+  // ── Status helpers ──────────────────────────────────────────
   function setStatus(state, msg) {
     document.getElementById('statusDot').className = 'dot' + (state === 'live' ? ' live' : state === 'error' ? ' error' : '');
     document.getElementById('statusText').textContent = msg;
   }
 
-  function diffClass(d) {
-    if (d === 0) return 'diff-0';
-    if (d <= 10) return 'diff-low';
-    if (d <= 30) return 'diff-mid';
-    return 'diff-high';
-  }
-
+  // ── Leaderboard processing ──────────────────────────────────
   function processRows(rows) {
     const entries = [];
-
     for (const r of rows) {
-      const keys = Object.keys(r) ;
-      console.log(keys)
+      const keys = Object.keys(r);
       const participant = r[keys[8]] || '—';
-      // const email = r[keys[1]] || '—';
-      // IMPORTANT: numeric values are columns 5,6,7
       const values = Object.values(r);
-
-      // Debug once to see structure
-      console.log(values);
-
-      // Try both possible positions (because of duplicate headers)
       const v1 = parseFloat(values[4]) || parseFloat(values[1]);
       const v2 = parseFloat(values[5]) || parseFloat(values[2]);
       const v3 = parseFloat(values[6]) || parseFloat(values[3]);
-
       if (isNaN(v1) || isNaN(v2) || isNaN(v3)) continue;
-
-      // RMSE calculation
-      const mse =
-        (Math.pow(v1 - CORRECT_V1, 2) +
-        Math.pow(v2 - CORRECT_V2, 2) +
-        Math.pow(v3 - CORRECT_V3, 2)) / 3;
-
+      const mse = (Math.pow(v1 - CORRECT_V1, 2) + Math.pow(v2 - CORRECT_V2, 2) + Math.pow(v3 - CORRECT_V3, 2)) / 3;
       const rmse = Math.sqrt(mse);
-
-      // Optional score (higher is better)
       const score = Math.max(0, 100 - Math.round(rmse * 2));
-
       entries.push({ participant, v1, v2, v3, rmse, score, timestamp: r[keys[0]] });
     }
-
-    // Sort by RMSE (lower = better)
     entries.sort((a, b) => a.rmse - b.rmse);
-
     return entries;
   }
+
   function groupByDay(entries) {
-      const groups = {};
+    const groups = {};
+    entries.forEach(e => {
+      if (!e.timestamp) return;
+      const day = e.timestamp.split(' ')[0];
+      if (!groups[day]) groups[day] = [];
+      groups[day].push(e);
+    });
+    Object.keys(groups).forEach(day => {
+      groups[day].sort((a, b) => a.rmse - b.rmse);
+    });
+    return groups;
+  }
 
-      entries.forEach(e => {
-        if (!e.timestamp) return;
+  // ── Answer distribution ─────────────────────────────────────
+  // CSV columns: 0=Timestamp, 1=PC1 answer, 2=PC2 answer, 3=PC3 answer, ...
+  function countAnswers(rows) {
+    const counts = [
+      Object.fromEntries(OPTIONS.map(o => [o, 0])),  // Q1
+      Object.fromEntries(OPTIONS.map(o => [o, 0])),  // Q2
+      Object.fromEntries(OPTIONS.map(o => [o, 0]))   // Q3
+    ];
 
-        // Extract date part (before space)
-        const day = e.timestamp.split(' ')[0];
-
-        if (!groups[day]) groups[day] = [];
-        groups[day].push(e);
+    rows.forEach(r => {
+      const vals = Object.values(r);
+      [vals[1], vals[2], vals[3]].forEach((ans, qi) => {
+        if (!ans) return;
+        const match = OPTIONS.find(o => ans.trim().toLowerCase() === o.toLowerCase());
+        if (match) counts[qi][match]++;
       });
+    });
+    return counts;
+  }
 
-      // Sort each day by RMSE
-      Object.keys(groups).forEach(day => {
-        groups[day].sort((a, b) => a.rmse - b.rmse);
-      });
+  const chartInstances = {};
 
-      return groups;
+  function renderChart(canvasId, counts, qIndex) {
+    const data = OPTIONS.map(o => counts[qIndex][o]);
+
+    const cfg = {
+      type: 'bar',
+      data: {
+        // labels: OPTIONS.map(o => o.length > 22 ? o.replace(' ', '\n') : o),
+        datasets: [{
+          data,
+          backgroundColor: OPT_COLORS.map(c => c + 'bb'),
+          borderColor: OPT_COLORS,
+          borderWidth: 1.5,
+          borderRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${OPTIONS[ctx.dataIndex]}: ${ctx.parsed.y}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#5a7080',
+              font: { family: "'Barlow Condensed', sans-serif", size: 11, weight: '500' },
+              maxRotation: 30
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { color: '#253040' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#5a7080',
+              font: { family: "'Space Mono', monospace", size: 11 },
+              stepSize: 1,
+              callback: v => Number.isInteger(v) ? v : null
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { color: '#253040' }
+          }
+        }
+      }
+    };
+
+    if (chartInstances[canvasId]) {
+      chartInstances[canvasId].data.datasets[0].data = data;
+      chartInstances[canvasId].update();
+    } else {
+      chartInstances[canvasId] = new Chart(document.getElementById(canvasId), cfg);
     }
+  }
 
-  function render(entries) {
-    // Stats
+  function renderCharts(rows) {
+    const counts = countAnswers(rows);
+    renderChart('chart1', counts, 0);
+    renderChart('chart2', counts, 1);
+    renderChart('chart3', counts, 2);
+  }
+
+  // ── Leaderboard render ──────────────────────────────────────
+  function render(entries, rows) {
     const avgRmse = (entries.reduce((s, e) => s + e.rmse, 0) / entries.length).toFixed(2);
-    const perfect = entries.filter(e => e.rmse === 0).length; 
+    const perfect = entries.filter(e => e.rmse === 0).length;
+
     document.getElementById('stats').innerHTML = `
       <div class="stats">
         <div class="stat-card"><div class="stat-label">Participants</div><div class="stat-value">${entries.length}</div></div>
@@ -267,72 +413,49 @@
         <div class="stat-card"><div class="stat-label">Perfect scores</div><div class="stat-value">${perfect}</div></div>
       </div>`;
 
-    // Table
-    const maxScore = entries[0].score || 1;
     let html = `<div class="table-wrap"><table>
       <thead><tr>
         <th>Rank</th>
         <th>Participant</th>
-
         <th style="text-align:right">RMSE</th>
       </tr></thead><tbody>`;
 
     entries.forEach((e, i) => {
-      const barW = Math.round((e.score / maxScore) * 100);
       html += `<tr class="${i === 0 ? 'top-row' : ''}">
         <td class="rank-cell">${medals[i] ? '<span class="medal">' + medals[i] + '</span>' : '#' + (i + 1)}</td>
-        <td class="participant-cell">${e.participant}</td>
-
+        <td>${e.participant}</td>
         <td class="diff-cell">${e.rmse.toFixed(3)}</td>
       </tr>`;
     });
-
     html += '</tbody></table></div>';
+
+    // Daily leaderboard
+    const dailyGroups = groupByDay(entries);
+    html += '<div class="daily-section"><h2>Daily leaderboard</h2>';
+    Object.keys(dailyGroups).sort((a, b) => new Date(b) - new Date(a)).forEach(day => {
+      const dayEntries = dailyGroups[day];
+      html += `<h3>${day}</h3>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th>Rank</th><th>Participant</th><th style="text-align:right">RMSE</th>
+          </tr></thead><tbody>`;
+      dayEntries.slice(0, 5).forEach((e, i) => {
+        html += `<tr>
+          <td class="rank-cell">${medals[i] || '#' + (i+1)}</td>
+          <td>${e.participant}</td>
+          <td class="diff-cell">${e.rmse.toFixed(3)}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+    });
+    html += '</div>';
+
     document.getElementById('out').innerHTML = html;
 
-    const dailyGroups = groupByDay(entries);
-
-  let dailyHtml = '<div style="margin-top:40px">';
-  dailyHtml += '<h2 style="margin-bottom:10px">📅 Daily Leaderboard</h2>';
-
-  Object.keys(dailyGroups)
-    .sort((a, b) => new Date(b) - new Date(a)) // newest first
-    .forEach(day => {
-      const dayEntries = dailyGroups[day];
-
-      dailyHtml += `
-        <h3 style="margin-top:20px">${day}</h3>
-        <table style="width:100%; margin-bottom:20px">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Participant</th>
-              <th style="text-align:right">RMSE</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      dayEntries.slice(0, 5).forEach((e, i) => {
-        dailyHtml += `
-          <tr>
-            <td>${medals[i] || '#' + (i + 1)}</td>
-            <td>${e.participant}</td>
-            <td style="text-align:right">${e.rmse.toFixed(3)}</td>
-          </tr>
-        `;
-      });
-
-      dailyHtml += '</tbody></table>';
-    });
-
-  dailyHtml += '</div>';
-
-  // Append below main table
-  document.getElementById('out').innerHTML += dailyHtml;
-
+    renderCharts(rows);
   }
 
+  // ── Load & refresh ──────────────────────────────────────────
   function loadAndRender() {
     setStatus('loading', 'Refreshing...');
     Papa.parse(CSV_URL + '?nocache=' + Date.now(), {
@@ -347,7 +470,7 @@
           setStatus('error', 'No valid data');
           return;
         }
-        render(entries);
+        render(entries, results.data);
         const now = new Date().toLocaleTimeString();
         setStatus('live', 'Live · last updated ' + now + ' · refreshes every ' + REFRESH_SECONDS + 's');
       },
@@ -356,7 +479,6 @@
         setStatus('error', 'Failed to load — check URL or CORS settings on GitHub Pages');
       }
     });
-    
   }
 
   loadAndRender();
