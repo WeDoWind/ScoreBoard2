@@ -342,6 +342,7 @@
       type: 'bar',
       data: {
         // labels: OPTIONS.map(o => o.length > 22 ? o.replace(' ', '\n') : o),
+        labels: OPTIONS.map(o => o.length > 22 ? o.replace(' ', '\n') : ""),
         datasets: [{
           data,
           backgroundColor: OPT_COLORS.map(c => c + 'bb'),
