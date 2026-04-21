@@ -1,6 +1,7 @@
 Timestamp,Power curve 1,Power curve 2,Power curve 3,Power curve 1.1,Power curve 2.1,Power curve 3.1,"Are you taking part in this challenge at the WindEurope Annual Event 2025 in Madrid, or are you online?",Please enter your nickname,Power curve 2.2
 21.04.2026,Pitch angle offset,Static yaw misalignment,Leading edge erosion,15,11,7,Online,frank,
 21.04.2026,Pitch angle offset,Static yaw misalignment,Leading edge erosion,5,2,4,At the WindEurope Annual Event 2025 in Madrid,AI,
+21.04.2026,Static yaw misalignment,Pitch angle offset,Leading edge erosion,20,10,5,At the WindEurope Annual Event 2025 in Madrid,Tinytim,
 21.04.2026,Static yaw misalignment,Wake effects,Leading edge erosion,20,9,5,At the WindEurope Annual Event 2025 in Madrid,Andreas Beck-Bang,
 21.04.2026,Wake effects,Pitch angle offset,Leading edge erosion,20,10,5,At the WindEurope Annual Event 2025 in Madrid,Fra,
 21.04.2026,Leading edge erosion,Static yaw misalignment,Static yaw misalignment,10,1,5,At the WindEurope Annual Event 2025 in Madrid,Loup,
@@ -12,7 +13,7 @@ Timestamp,Power curve 1,Power curve 2,Power curve 3,Power curve 1.1,Power curve 
 21.04.2026,Severe Icing,Pitch angle offset,Wake effects,50,80,10,At the WindEurope Annual Event 2025 in Madrid,Ty,
 21.04.2026,Severe Icing,Pitch angle offset,Static yaw misalignment,8,2,5,At the WindEurope Annual Event 2025 in Madrid,AI3,
 21.04.2026,Severe Icing,Pitch angle offset,Static yaw misalignment,10,1,5,At the WindEurope Annual Event 2025 in Madrid,AI2,
-21.04.2026,Static yaw misalignment,Pitch angle offset,Leading edge erosion,20,10,5,At the WindEurope Annual Event 2025 in Madrid,Tinytim,
+21.04.2026,Leading edge erosion,Static yaw misalignment,Wake effects,8,12,2,At the WindEurope Annual Event 2025 in Madrid,Jonny Crease,
 21.04.2026,Static yaw misalignment,Wake effects,Severe Icing,5,8,2,At the WindEurope Annual Event 2025 in Madrid,Bart,
 21.04.2026,Static yaw misalignment,Leading edge erosion,Severe Icing,10,20,5,At the WindEurope Annual Event 2025 in Madrid,Cian ,
 21.04.2026,Wake effects,Leading edge erosion,Static yaw misalignment,20,20,20,At the WindEurope Annual Event 2025 in Madrid,Nacho,
