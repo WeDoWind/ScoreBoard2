@@ -444,7 +444,13 @@
     // Daily leaderboard
     const dailyGroups = groupByDay(entries);
     html += '<div class="daily-section"><h2>Daily leaderboard</h2>';
-    Object.keys(dailyGroups).sort((a, b) => new Date(a) - new Date(b)).forEach(day => {
+    Object.keys(dailyGroups)
+    .sort((a, b) => {
+      const [da, ma, ya] = a.split('.');
+      const [db, mb, yb] = b.split('.');
+      return new Date(yb, mb - 1, db) - new Date(ya, ma - 1, da);
+    })
+    .forEach(day => {
       const dayEntries = dailyGroups[day];
       html += `<h3>${day}</h3>
         <div class="table-wrap"><table>
